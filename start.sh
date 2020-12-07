@@ -5,7 +5,7 @@ curl -sS https://dl.yarnpkg.com/debian/pubkey.gpg | sudo apt-key add -
 echo "deb https://dl.yarnpkg.com/debian/ stable main" | sudo tee /etc/apt/sources.list.d/yarn.list
 
 apt-get update
-apt-get -y install git vim docker.io build-essential golang jq libghc-yaml-dev openvpn yarn
+apt-get -y install git vim snapd screen docker.io build-essential golang jq libghc-yaml-dev openvpn yarn nodejs
 
 snap install kubectl --classic
 
@@ -15,6 +15,8 @@ git clone https://github.com/gardener/dashboard.git
 
 cat << 'FIRST' > first.sh
 #!/bin/bash
+set -x
+
 make local-garden-up
 
 mkdir ~/.kube/
@@ -44,11 +46,11 @@ echo $TOKEN | tee testuser-token
 FIRST
 
 cat > screenrc-gardener <<EOF
-screen -t setup bash -c "chmod a+x ../first.sh && ../first.sh 2>&1 | tee -a ../setup.txt"
-screen -t apiserver bash -c "sleep 30 && make start-apiserver 2>&1 | tee -a ../apiserver.txt"
-screen -t controller-manager bash -c "sleep 30 && make start-controller-manager 2>&1 | tee -a ../controller-manager.txt"
-screen -t scheduler bash -c "sleep 30 && make start-scheduler 2>&1 | tee -a ../scheduler.txt"
-screen -t gardenlet bash -c "sleep 30 && make start-gardenlet 2>&1 | tee -a ../gardenlet.txt"
+screen -t setup bash -x -c "( chmod a+x ../first.sh && ../first.sh ) 2>&1 | tee -a ../setup.txt"
+screen -t apiserver bash -x -c "( sleep 30 && make start-apiserver ) 2>&1 | tee -a ../apiserver.txt"
+screen -t controller-manager bash -x -c "( sleep 30 && make start-controller-manager ) 2>&1 | tee -a ../controller-manager.txt"
+screen -t scheduler bash -x -c "( sleep 30 && make start-scheduler ) 2>&1 | tee -a ../scheduler.txt"
+screen -t gardenlet bash -x -c "( sleep 30 && make start-gardenlet ) 2>&1 | tee -a ../gardenlet.txt"
 EOF
 
 pushd gardener
@@ -57,8 +59,8 @@ popd
 
 
 cat > screenrc-dashboard <<EOF
-screen -t backend bash -c "sleep 120 && cd backend && mkdir -p ~/.gardener/ && cp lib/config/test.yaml ~/.gardener/config.yaml && yarn && yarn serve 2>&1 | tee -a ../backend.txt"
-screen -t frontend bash -c "sleep 120 && cd frontend && yarn && yarn serve 2>&1 | tee -a ../frontend.txt"
+screen -t backend bash -x -c "( sleep 60 && cd backend && mkdir -p ~/.gardener/ && cp lib/config/test.yaml ~/.gardener/config.yaml && yarn && yarn serve ) 2>&1 | tee -a ../backend.txt"
+screen -t frontend bash -x -c "( sleep 120 && cd frontend && yarn && yarn serve ) 2>&1 | tee -a ../frontend.txt"
 EOF
 
 pushd dashboard
