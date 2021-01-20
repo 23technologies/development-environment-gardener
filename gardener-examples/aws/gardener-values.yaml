@@ -1,0 +1,28 @@
+global:
+  apiserver:
+    clusterIdentity: garden-cluster-identity
+    image:
+      tag: v1.15.0
+    etcd:
+      servers: http://etcd-etcd-client:2379
+      useSidecar: false
+  controller:
+    image:
+      tag: v1.15.0
+  admission:
+    replicaCount: 1
+    image:
+      tag: v1.15.0
+  internalDomain:
+    provider: aws-route53
+    hostedZoneID: <zone-id>
+    domain: <your-domain>
+    credentials:
+      AWS_ACCESS_KEY_ID: <key-id-base64>
+      AWS_SECRET_ACCESS_KEY: <key-base64>
+  defaultDomains:
+  - domain: <your-domain>
+    provider: aws-route53 # depends on the DNS extension of your choice
+    credentials:
+      AWS_ACCESS_KEY_ID: <key-id-base64>
+      AWS_SECRET_ACCESS_KEY: <key-base64>

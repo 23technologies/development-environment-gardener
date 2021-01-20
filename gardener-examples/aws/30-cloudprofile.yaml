@@ -1,0 +1,42 @@
+apiVersion: core.gardener.cloud/v1beta1
+kind: CloudProfile
+metadata:
+  name: aws
+spec:
+  type: aws
+  kubernetes:
+    versions:
+    - version: 1.19.6
+  machineImages:
+  - name: coreos
+    versions:
+    - version: 2605.10.0
+  machineTypes:
+  - name: t3.medium
+    cpu: "2"
+    gpu: "0"
+    memory: 2Gi
+    usable: true
+  volumeTypes:
+  - name: gp2
+    class: standard
+    usable: true
+  - name: io1
+    class: premium
+    usable: true
+  regions:
+  - name: eu-central-1
+    zones:
+    - name: eu-central-1a
+    - name: eu-central-1b
+    - name: eu-central-1c
+  providerConfig:
+    apiVersion: aws.provider.extensions.gardener.cloud/v1alpha1
+    kind: CloudProfileConfig
+    machineImages:
+    - name: coreos
+      versions:
+      - version: 2605.10.0
+        regions:
+        - name: eu-central-1
+          ami: ami-0d7b1dc2bc79a8de0 # actually a flatcar image

@@ -12,9 +12,12 @@ resource "hcloud_ssh_key" "default" {
   }
 }
 
+resource "random_id" "dev" {
+  byte_length = 2
+}
 
 resource "hcloud_server" "dev" {
-  name        = "dev"
+  name        = "dev-${random_id.dev.dec}"
   image       = "ubuntu-20.04"
   server_type = "cpx31"
   location    = "fsn1"
@@ -32,10 +35,31 @@ resource "hcloud_server" "dev" {
     destination = "/tmp/start.sh"
   }
 
-  provisioner "remote-exec" {
+
+}
+
+resource "hcloud_volume" "dev" {
+  name = "dev-${random_id.dev.dec}"
+  location = "fsn1"
+  size     = 10
+  format   = "ext4"
+}
+
+resource "hcloud_volume_attachment" "dev" {
+  volume_id = hcloud_volume.dev.id
+  server_id = hcloud_server.dev.id
+  automount = true
+
+    provisioner "remote-exec" {
+          connection {
+      host     = hcloud_server.dev.ipv4_address
+      user     = "root"
+      type     = "ssh"
+      timeout  = "2m"
+    }
     inline = [
       "chmod +x /tmp/start.sh",
-      "/tmp/start.sh",
+      "/tmp/start.sh /mnt/HC_Volume_${hcloud_volume.dev.id}",
     ]
   }
 }

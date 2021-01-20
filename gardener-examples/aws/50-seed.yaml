@@ -1,0 +1,59 @@
+# Seed cluster registration manifest into which the control planes of Shoot clusters will be deployed.
+---
+apiVersion: core.gardener.cloud/v1beta1
+kind: Seed
+metadata:
+  name: aws-seed
+  labels:
+    test: foo
+spec:
+  provider:
+    type: aws # e.g., aws, azure, gcp, ...
+    region: eu-central-1
+  # providerConfig:
+  #   <some-provider-specific-config-for-the-seed>
+# Optional, only needed if controlled by a Gardenlet running outside
+  secretRef:
+    name: seed-secret
+    namespace: garden
+# Configuration of backup object store provider into which the backups will be stored.
+# If you don't want to have backups then don't specify the `.spec.backup` key.
+#  backup:
+#    provider: <provider-name> # e.g., aws, azure, gcp, ...
+  # providerConfig:
+    # <some-provider-specific-config-for-the-backup-buckets>
+#    region: europe-1
+#    secretRef:
+#      name: backup-secret
+#      namespace: garden
+  dns:
+    ingressDomain: aws-seed.<your-domain>
+  networks: # seed and shoot networks must be disjunct
+    nodes: 172.20.0.0/16
+    pods: 100.96.0.0/16
+    services: 10.64.0.0/11
+  # shootDefaults:
+  #   pods: 100.96.0.0/11
+  #   services: 100.64.0.0/13
+#    blockCIDRs:
+#    - 169.254.169.254/32
+  settings:
+    excessCapacityReservation:
+      enabled: false # this seed will deploy excess-capacity-reservation pods
+    scheduling:
+      visible: true # the gardener-scheduler will consider this seed for shoots
+    shootDNS:
+      enabled: true # all shoots on this seed will use DNS, if disabled they'll just use the plain IPs/hostnames
+  # loadBalancerServices:
+  #   annotations:
+  #     foo: bar
+    verticalPodAutoscaler:
+      enabled: true # a Gardener-managed VPA deployment is enabled
+# taints:
+# - key: seed.gardener.cloud/protected # only shoots in the `garden` namespace can use this seed
+# - key: <some-key>
+# volume:
+#  minimumSize: 20Gi
+#  providers:
+#  - purpose: etcd-main
+#    name: flexvolume
