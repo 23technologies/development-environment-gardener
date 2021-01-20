@@ -1,6 +1,8 @@
 #!/bin/bash
 set -x
 
+mypath=$1
+
 curl -sS https://dl.yarnpkg.com/debian/pubkey.gpg | sudo apt-key add -
 echo "deb https://dl.yarnpkg.com/debian/ stable main" | sudo tee /etc/apt/sources.list.d/yarn.list
 
@@ -8,6 +10,12 @@ apt-get update
 apt-get -y install git vim snapd screen docker.io build-essential golang jq libghc-yaml-dev openvpn yarn nodejs mockgen
 
 snap install kubectl --classic
+
+cd $mypath
+
+curl -Lo ./kind https://kind.sigs.k8s.io/dl/v0.9.0/kind-linux-amd64
+chmod +x ./kind
+
 
 git clone https://github.com/gardener/gardener.git
 

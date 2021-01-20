@@ -1,0 +1,65 @@
+apiVersion: core.gardener.cloud/v1alpha1
+kind: Shoot
+metadata:
+  name: test1-aws
+  namespace: garden-dev
+spec:
+  dns:
+    domain: test1.<your-domain>
+    providers:
+    - secretName: aws-route53
+      type: aws-route53
+  seedName: my-seed
+  cloudProfileName: aws
+  region: eu-central-1
+  secretBindingName: my-provider-account
+  purpose: evaluation # {testing,development,production,infrastructure}, "infrastructure" purpose only usable for shoots in garden namespace
+  provider:
+    type: aws
+    infrastructureConfig:
+      apiVersion: aws.provider.extensions.gardener.cloud/v1alpha1
+      kind: InfrastructureConfig  
+      networks:
+        vpc:
+          cidr: 10.250.0.0/16
+        zones:
+        - name: eu-central-1a
+          internal: 10.250.112.0/22
+          public: 10.250.96.0/22
+          workers: 10.250.0.0/19
+    controlPlaneConfig:
+      apiVersion: aws.provider.extensions.gardener.cloud/v1alpha1
+      kind: ControlPlaneConfig
+    workers:
+    - name: worker-test1
+      machine:
+        type: t3.medium
+      minimum: 1
+      maximum: 1
+      volume:
+        size: 10Gi
+        type: gp2
+    # The following provider config is only valid if the volume type is `io1`.
+    # providerConfig:
+    #   apiVersion: aws.provider.extensions.gardener.cloud/v1alpha1
+    #   kind: WorkerConfig
+    #   volume:
+    #     iops: 10000
+      zones:
+      - eu-central-1a
+  networking:
+    nodes: 10.250.0.0/16
+    pods: 10.100.0.0/16
+    services: 10.101.0.0/16
+    type: calico
+  kubernetes:
+    version: 1.19.6
+  maintenance:
+    autoUpdate:
+      kubernetesVersion: true
+      machineImageVersion: true
+  addons:
+    kubernetes-dashboard:
+      enabled: false
+    nginx-ingress:
+      enabled: false
